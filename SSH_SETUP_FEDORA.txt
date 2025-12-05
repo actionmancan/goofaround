@@ -1,0 +1,82 @@
+================================================================================
+SSH SETUP INSTRUCTIONS FOR FEDORA MACHINE
+================================================================================
+
+Run these commands on your Fedora machine to set up passwordless SSH access
+from your Mac.
+
+STEP 1: Create .ssh directory and set permissions
+--------------------------------------------------
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+
+STEP 2: Add your public SSH key
+--------------------------------
+Copy and paste this entire command (it's all one line):
+
+echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA1j+0N4GvMVI1mMnVdvL26jy/+tfXvS8timFallZ5lE nesmith@redhat.com" >> ~/.ssh/authorized_keys
+
+STEP 3: Set correct permissions on authorized_keys
+---------------------------------------------------
+chmod 600 ~/.ssh/authorized_keys
+
+STEP 4: Fix SELinux context (if SELinux is enabled)
+----------------------------------------------------
+restorecon -R ~/.ssh
+
+STEP 5: Verify the key was added
+---------------------------------
+cat ~/.ssh/authorized_keys
+
+You should see a line starting with "ssh-ed25519" and ending with "nesmith@redhat.com"
+
+STEP 6: Verify SSH configuration
+---------------------------------
+sudo grep -E "PasswordAuthentication|PubkeyAuthentication" /etc/ssh/sshd_config
+
+Both should show "yes". If not, edit the config:
+sudo nano /etc/ssh/sshd_config
+
+Make sure these lines are set:
+PasswordAuthentication yes
+PubkeyAuthentication yes
+
+Then restart SSH:
+sudo systemctl restart sshd
+
+STEP 7: Test from Mac
+----------------------
+After running all the above commands, go back to your Mac and try:
+ssh ChaletSmithHome@192.168.1.100
+
+It should connect without asking for a password!
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+If SSH still doesn't work:
+
+1. Check SSH service is running:
+   sudo systemctl status sshd
+
+2. Check firewall allows SSH:
+   sudo firewall-cmd --list-services
+   (Should see "ssh" in the list)
+   
+   If not, add it:
+   sudo firewall-cmd --permanent --add-service=ssh
+   sudo firewall-cmd --reload
+
+3. Check file permissions:
+   ls -la ~/.ssh/
+   
+   Should show:
+   drwx------  (700) for .ssh directory
+   -rw-------  (600) for authorized_keys file
+
+4. Check SSH logs for errors:
+   sudo journalctl -u sshd -n 50
+
+================================================================================
+
