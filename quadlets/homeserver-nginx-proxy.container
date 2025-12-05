@@ -1,0 +1,41 @@
+[Unit]
+Description=Nginx Proxy Manager for Home Server
+After=homeserver-network.service
+Requires=homeserver-network.service
+
+[Container]
+Image=docker.io/jc21/nginx-proxy-manager:latest
+ContainerName=homeserver-nginx-proxy
+AutoUpdate=registry
+
+# Network
+Network=homeserver.network
+PublishPort=80:80
+PublishPort=443:443
+PublishPort=8181:81
+
+# Volumes
+Volume=%h/Documents/GitHub/goofaround/configs/nginx-proxy:/data:Z
+Volume=%h/Documents/GitHub/goofaround/data/nginx-proxy/letsencrypt:/etc/letsencrypt:Z
+
+# Environment
+Environment=TZ=America/New_York
+Environment=DISABLE_IPV6=true
+
+# Security
+SecurityLabelDisable=false
+
+# Health Check
+HealthCmd=curl --fail http://localhost:81 || exit 1
+HealthInterval=30s
+HealthTimeout=10s
+HealthRetries=3
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target
+
+

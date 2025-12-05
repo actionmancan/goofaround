@@ -1,0 +1,48 @@
+[Unit]
+Description=Home Assistant for Home Server
+After=homeserver-mosquitto.service
+Wants=homeserver-mosquitto.service homeserver-zigbee2mqtt.service
+
+[Container]
+Image=ghcr.io/home-assistant/home-assistant:stable
+ContainerName=homeserver-homeassistant
+AutoUpdate=registry
+
+# Network
+Network=homeserver.network
+PublishPort=8123:8123
+
+# Volumes
+Volume=%h/Documents/GitHub/goofaround/configs/homeassistant:/config:Z
+Volume=/etc/localtime:/etc/localtime:ro
+Volume=/run/dbus:/run/dbus:ro
+
+# Environment
+Environment=TZ=America/New_York
+
+# Privileged for Bluetooth/USB access if needed
+# Uncomment if you need Bluetooth integration
+# AddCapability=NET_ADMIN
+# AddCapability=NET_RAW
+
+# Host network mode (commented out - use bridge mode by default)
+# NetworkMode=host
+
+# Security
+SecurityLabelDisable=false
+
+# Health Check
+HealthCmd=curl --fail http://localhost:8123 || exit 1
+HealthInterval=30s
+HealthTimeout=10s
+HealthRetries=5
+HealthStartPeriod=90s
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target
+
+

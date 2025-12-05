@@ -1,0 +1,47 @@
+[Unit]
+Description=Zigbee2MQTT Bridge for Home Server
+After=homeserver-mosquitto.service
+Requires=homeserver-mosquitto.service
+
+[Container]
+Image=docker.io/koenkk/zigbee2mqtt:latest
+ContainerName=homeserver-zigbee2mqtt
+AutoUpdate=registry
+
+# Network
+Network=homeserver.network
+PublishPort=8080:8080
+
+# Volumes
+Volume=%h/Documents/GitHub/goofaround/configs/zigbee2mqtt:/app/data:Z
+Volume=/run/udev:/run/udev:ro
+
+# Device passthrough for Zigbee coordinator
+# NOTE: Update this path to match your Zigbee USB device
+# Find it with: ls -l /dev/serial/by-id/
+AddDevice=/dev/ttyACM0
+
+# Environment
+Environment=TZ=America/New_York
+
+# Capabilities for USB device access
+AddCapability=SYS_ADMIN
+
+# Security
+SecurityLabelDisable=false
+HostDevice=/dev/ttyACM0
+
+# Health Check
+HealthCmd=wget --no-verbose --tries=1 --spider http://localhost:8080 || exit 1
+HealthInterval=30s
+HealthTimeout=10s
+HealthRetries=3
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target
+
+

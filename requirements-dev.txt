@@ -1,0 +1,32 @@
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+pytest-timeout==2.2.0
+pytest-mock==3.12.0
+
+# Code Quality
+black==23.12.0
+flake8==6.1.0
+mypy==1.7.1
+pylint==3.0.3
+
+# Utilities
+pyyaml==6.0.1
+requests==2.31.0
+toml==0.10.2
+
+# Container Testing
+podman-py==0.1.0
+docker==7.0.0  # For API compatibility
+
+# Home Assistant Testing
+homeassistant-api==1.1.0
+
+# MQTT Testing
+paho-mqtt==1.6.1
+
+# Network Testing
+netifaces==0.11.0
+
+

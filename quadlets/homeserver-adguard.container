@@ -1,0 +1,44 @@
+[Unit]
+Description=AdGuard Home DNS for Home Server
+After=homeserver-network.service
+Requires=homeserver-network.service
+
+[Container]
+Image=docker.io/adguard/adguardhome:latest
+ContainerName=homeserver-adguard
+AutoUpdate=registry
+
+# Network
+Network=homeserver.network
+PublishPort=53:53/tcp
+PublishPort=53:53/udp
+PublishPort=3000:3000
+PublishPort=853:853/tcp
+PublishPort=853:853/udp
+PublishPort=784:784/udp
+PublishPort=8853:8853/udp
+
+# Volumes
+Volume=%h/Documents/GitHub/goofaround/configs/adguard/work:/opt/adguardhome/work:Z
+Volume=%h/Documents/GitHub/goofaround/configs/adguard/conf:/opt/adguardhome/conf:Z
+
+# Environment
+Environment=TZ=America/New_York
+
+# Security
+SecurityLabelDisable=false
+
+# Health Check
+HealthCmd=wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+HealthInterval=30s
+HealthTimeout=10s
+HealthRetries=3
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target
+
+
