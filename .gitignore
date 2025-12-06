@@ -37,6 +37,7 @@ configs/*/
 *.pem
 secrets.yaml
 secrets.yml
+secrets/
 
 # Logs
 *.log

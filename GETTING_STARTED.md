@@ -139,6 +139,48 @@ sudo dnf install -y python3 python3-pip
 sudo apt install -y python3 python3-pip python3-venv
 ```
 
+### Prevent System Sleep (Important for Servers!)
+
+**Critical:** Your home server needs to stay awake 24/7. Disable sleep/suspend:
+
+```bash
+# Disable sleep in systemd-logind
+sudo sed -i 's/#HandleSuspendKey=suspend/HandleSuspendKey=ignore/' /etc/systemd/logind.conf
+sudo sed -i 's/#HandleHibernateKey=hibernate/HandleHibernateKey=ignore/' /etc/systemd/logind.conf
+sudo sed -i 's/#HandleLidSwitch=suspend/HandleLidSwitch=ignore/' /etc/systemd/logind.conf
+
+# Add settings if they don't exist
+echo "HandleSuspendKey=ignore" | sudo tee -a /etc/systemd/logind.conf
+echo "HandleHibernateKey=ignore" | sudo tee -a /etc/systemd/logind.conf
+echo "HandleLidSwitch=ignore" | sudo tee -a /etc/systemd/logind.conf
+
+# Mask sleep targets (prevents sleep completely)
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
+# Restart logind service
+sudo systemctl restart systemd-logind
+
+# Disable network sleep
+for iface in /sys/class/net/*; do
+    echo "on" | sudo tee "$iface/power/control" 2>/dev/null
+done
+```
+
+**If using GNOME desktop (Fedora Workstation):**
+```bash
+# Disable screen blanking and suspend
+gsettings set org.gnome.desktop.session idle-delay 0
+gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
+gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
+```
+
+**Reboot after making these changes:**
+```bash
+sudo reboot
+```
+
+See [PREVENT_SLEEP_FEDORA.md](PREVENT_SLEEP_FEDORA.md) for complete details and troubleshooting.
+
 ### Connect Hardware
 1. **Cameras**: Connect to PoE switch
 2. **PoE Switch**: Connect to router

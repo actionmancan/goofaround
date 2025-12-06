@@ -32,6 +32,36 @@ sudo apt update
 sudo apt install -y podman
 ```
 
+### 1.5. Prevent System Sleep (Important!)
+
+**Critical:** Your home server must stay awake 24/7. Disable sleep/suspend:
+
+```bash
+# Disable sleep in systemd-logind
+sudo sed -i 's/#HandleSuspendKey=suspend/HandleSuspendKey=ignore/' /etc/systemd/logind.conf
+sudo sed -i 's/#HandleHibernateKey=hibernate/HandleHibernateKey=ignore/' /etc/systemd/logind.conf
+sudo sed -i 's/#HandleLidSwitch=suspend/HandleLidSwitch=ignore/' /etc/systemd/logind.conf
+
+# Add settings if missing
+echo "HandleSuspendKey=ignore" | sudo tee -a /etc/systemd/logind.conf
+echo "HandleHibernateKey=ignore" | sudo tee -a /etc/systemd/logind.conf
+echo "HandleLidSwitch=ignore" | sudo tee -a /etc/systemd/logind.conf
+
+# Mask sleep targets
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+sudo systemctl restart systemd-logind
+
+# Disable network sleep
+for iface in /sys/class/net/*; do
+    echo "on" | sudo tee "$iface/power/control" 2>/dev/null
+done
+
+# Reboot to apply changes
+sudo reboot
+```
+
+See [PREVENT_SLEEP_FEDORA.md](../PREVENT_SLEEP_FEDORA.md) for details.
+
 ### 2. Clone Repository
 
 ```bash
