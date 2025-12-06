@@ -37,7 +37,7 @@ configs/*/
 *.pem
 secrets.yaml
 secrets.yml
-secrets/
+# secrets/ - TEMPORARILY COMMENTED OUT (2025-12-06) - UNCOMMENT AFTER 2 DAYS!
 
 # Logs
 *.log

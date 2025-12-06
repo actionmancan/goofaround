@@ -465,4 +465,3 @@ make logs SERVICE=frigate      # View logs
 ---
 
 *Work through each step one at a time. Don't move to next step until current step works!*
-
