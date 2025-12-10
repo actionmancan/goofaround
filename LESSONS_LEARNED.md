@@ -50,7 +50,25 @@ mqtt:
 
 ---
 
-## 3. Home Assistant Frigate Integration
+## 3. Zigbee2MQTT Configuration (CRITICAL)
+
+Same issue - Zigbee2MQTT MUST use static IP for Mosquitto.
+
+**Inside container at `/app/data/configuration.yaml`:**
+```yaml
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://172.20.0.10:1883   # NOT homeserver-mosquitto!
+```
+
+### IKEA Trådfri Bulb Pairing
+1. Enable permit join: publish `{"time": 180}` to `zigbee2mqtt/bridge/request/permit_join`
+2. Reset bulb: Turn ON/OFF 6 times (2 sec each), bulb flashes when in pairing mode
+3. Bulb auto-joins within ~30 seconds
+
+---
+
+## 4. Home Assistant Frigate Integration
 
 ### Install the Custom Integration
 ```bash
@@ -233,6 +251,80 @@ systemctl --user restart homeserver-homeassistant
 | Home Assistant | 172.20.0.30 | 8123 |
 | Camera (Reolink) | 192.168.1.126 | 554, 9000 |
 | Fedora Server | 192.168.1.100 | 22 |
+
+---
+
+---
+
+## 11. Complete Setup Script
+
+A single setup script that does everything is available at:
+
+```bash
+scripts/setup-homeserver.sh
+```
+
+### Usage:
+```bash
+# Set your camera credentials first
+export CAMERA_IP="192.168.1.126"
+export CAMERA_USER="admin"
+export CAMERA_PASS="your_password_here"
+
+# Run the script
+chmod +x scripts/setup-homeserver.sh
+./scripts/setup-homeserver.sh
+```
+
+The script:
+1. Prevents system sleep
+2. Installs Podman
+3. Creates directory structure
+4. Creates all config files with correct static IPs
+5. Creates Podman Quadlet service files
+6. Starts all services
+
+---
+
+## 12. IKEA Trådfri Bulb Setup
+
+### Pairing Procedure
+1. **Enable permit join** in Zigbee2MQTT:
+   ```bash
+   podman exec homeserver-mosquitto mosquitto_pub -h localhost \
+     -t "zigbee2mqtt/bridge/request/permit_join" -m '{"time": 180}'
+   ```
+
+2. **Factory reset the bulb**: Turn ON/OFF **6 times** with 2-second intervals
+   - The bulb will **flash once** when it enters pairing mode
+
+3. **Wait ~30 seconds** - the bulb auto-joins
+
+4. **Rename the device**:
+   ```bash
+   podman exec homeserver-mosquitto mosquitto_pub -h localhost \
+     -t "zigbee2mqtt/bridge/request/device/rename" \
+     -m '{"from": "0xXXXXXXXXXXXXXXXX", "to": "Living Room Light"}'
+   ```
+
+### Control Commands
+```bash
+# Turn ON
+podman exec homeserver-mosquitto mosquitto_pub -h localhost \
+  -t "zigbee2mqtt/Living Room Light/set" -m '{"state": "ON"}'
+
+# Turn OFF  
+podman exec homeserver-mosquitto mosquitto_pub -h localhost \
+  -t "zigbee2mqtt/Living Room Light/set" -m '{"state": "OFF"}'
+
+# Set brightness (0-254)
+podman exec homeserver-mosquitto mosquitto_pub -h localhost \
+  -t "zigbee2mqtt/Living Room Light/set" -m '{"brightness": 128}'
+
+# Set color temperature (250-454 mireds, or 2200K-4000K)
+podman exec homeserver-mosquitto mosquitto_pub -h localhost \
+  -t "zigbee2mqtt/Living Room Light/set" -m '{"color_temp": 350}'
+```
 
 ---
 

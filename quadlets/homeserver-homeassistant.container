@@ -8,35 +8,28 @@ Image=ghcr.io/home-assistant/home-assistant:stable
 ContainerName=homeserver-homeassistant
 AutoUpdate=registry
 
-# Network
+# Network - CRITICAL: Static IP!
 Network=homeserver.network
+IP=172.20.0.30
 PublishPort=8123:8123
 
-# Volumes
-Volume=%h/Documents/GitHub/goofaround/configs/homeassistant:/config:Z
+# Volumes - UPDATE paths for your system
+Volume=%h/homeserver/configs/homeassistant:/config:Z
 Volume=/etc/localtime:/etc/localtime:ro
 Volume=/run/dbus:/run/dbus:ro
 
 # Environment
 Environment=TZ=America/New_York
 
-# Privileged for Bluetooth/USB access if needed
-# Uncomment if you need Bluetooth integration
-# AddCapability=NET_ADMIN
-# AddCapability=NET_RAW
-
-# Host network mode (commented out - use bridge mode by default)
-# NetworkMode=host
-
-# Security
-SecurityLabelDisable=false
+# Install Frigate dependency on startup (CRITICAL for Frigate integration!)
+Exec=/bin/sh -c "echo nameserver 8.8.8.8 > /etc/resolv.conf && pip3 install -q hass-web-proxy-lib==0.0.7 2>/dev/null; exec /init"
 
 # Health Check
 HealthCmd=curl --fail http://localhost:8123 || exit 1
 HealthInterval=30s
 HealthTimeout=10s
 HealthRetries=5
-HealthStartPeriod=90s
+HealthStartPeriod=120s
 
 [Service]
 Restart=always
@@ -44,5 +37,3 @@ TimeoutStartSec=900
 
 [Install]
 WantedBy=default.target
-
-

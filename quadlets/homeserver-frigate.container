@@ -8,16 +8,17 @@ Image=ghcr.io/blakeblackshear/frigate:stable
 ContainerName=homeserver-frigate
 AutoUpdate=registry
 
-# Network
+# Network - CRITICAL: Static IP!
 Network=homeserver.network
+IP=172.20.0.20
 PublishPort=5000:5000
 PublishPort=8554:8554
 PublishPort=8555:8555/tcp
 PublishPort=8555:8555/udp
 
-# Volumes
-Volume=%h/Documents/GitHub/goofaround/configs/frigate:/config:Z
-Volume=%h/Documents/GitHub/goofaround/data/media/frigate:/media/frigate:Z
+# Volumes - UPDATE paths for your system
+Volume=%h/homeserver/configs/frigate:/config:Z
+Volume=%h/homeserver/data/media/frigate:/media/frigate:Z
 Volume=/etc/localtime:/etc/localtime:ro
 
 # Shared memory for faster processing
@@ -25,21 +26,9 @@ ShmSize=512mb
 
 # Environment
 Environment=TZ=America/New_York
-Environment=FRIGATE_RTSP_PASSWORD=password
-
-# Device access for hardware acceleration
-# Intel QuickSync
-# AddDevice=/dev/dri
-
-# Coral TPU (if you have one)
-# AddDevice=/dev/bus/usb
-# AddDevice=/dev/apex_0
 
 # Capabilities
 AddCapability=CAP_PERFMON
-
-# Security
-SecurityLabelDisable=false
 
 # Health Check
 HealthCmd=curl --fail http://localhost:5000/api/version || exit 1
@@ -54,5 +43,3 @@ TimeoutStartSec=900
 
 [Install]
 WantedBy=default.target
-
-

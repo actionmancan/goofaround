@@ -8,28 +8,19 @@ Image=docker.io/eclipse-mosquitto:latest
 ContainerName=homeserver-mosquitto
 AutoUpdate=registry
 
-# Network
+# Network - CRITICAL: Static IP!
 Network=homeserver.network
+IP=172.20.0.10
 PublishPort=1883:1883
 PublishPort=9001:9001
 
-# Volumes
-Volume=%h/Documents/GitHub/goofaround/configs/mosquitto:/mosquitto/config:Z
-Volume=%h/Documents/GitHub/goofaround/data/mosquitto/data:/mosquitto/data:Z
-Volume=%h/Documents/GitHub/goofaround/data/mosquitto/log:/mosquitto/log:Z
+# Volumes - UPDATE paths for your system
+Volume=%h/homeserver/configs/mosquitto:/mosquitto/config:Z
+Volume=%h/homeserver/data/mosquitto/data:/mosquitto/data:Z
+Volume=%h/homeserver/data/mosquitto/log:/mosquitto/log:Z
 
 # Environment
 Environment=TZ=America/New_York
-
-# Security
-User=1883
-SecurityLabelDisable=false
-
-# Health Check
-HealthCmd=mosquitto_sub -t '$$SYS/#' -C 1 || exit 1
-HealthInterval=30s
-HealthTimeout=10s
-HealthRetries=3
 
 [Service]
 Restart=always
@@ -37,5 +28,3 @@ TimeoutStartSec=900
 
 [Install]
 WantedBy=default.target
-
-
